@@ -3,10 +3,11 @@ import React, { useEffect, useState } from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
 import MovieList from './components/MovieList';
 import Movie from './components/Movie';
-
+// import AddMovieForm from './components/AddMovieForm';
 import MovieHeader from './components/MovieHeader';
-
+import EditMovieForm from './components/EditMovieForm';
 import FavoriteMovieList from './components/FavoriteMovieList';
+import DeleteMovieModal from "./components/DeleteMovieModal";
 
 import axios from 'axios';
 
@@ -15,7 +16,7 @@ const App = (props) => {
   const [favoriteMovies, setFavoriteMovies] = useState([]);
 
   useEffect(()=>{
-    axios.get('http://localhost:5001/api/movies')
+    axios.get('http://localhost:9000/api/movies')
       .then(res => {
         setMovies(res.data);
       })
@@ -25,11 +26,19 @@ const App = (props) => {
   }, []);
 
   const deleteMovie = (id)=> {
+    console.log('App.js ln:25 id', id);
+    axios.delete(`http://localhost:5000/api/movies/${id}`)
+    .then(res => {
+      setMovies(movies.filter(movie => movie.id !== id));
+    })
+    .catch(err => {
+      console.log(err);
+    });
   }
 
-  const addToFavorites = (movie) => {
+  // const addToFavorites = (movie) => {
     
-  }
+  // }
 
   return (
     <div>
@@ -43,11 +52,13 @@ const App = (props) => {
           <FavoriteMovieList favoriteMovies={favoriteMovies}/>
         
           <Switch>
-            <Route path="/movies/edit/:id">
+            <Route path="/movies/add" render={props=> <AddMovieForm {...props} setMovies={setMovies}/>}>
+            </Route>
+          <Route path="/movies/edit/:id" render={props => <EditMovieForm {...props} setMovies={setMovies} />}>
             </Route>
 
             <Route path="/movies/:id">
-              <Movie/>
+              <Movie deleteMovie={deleteMovie}/>
             </Route>
 
             <Route path="/movies">
